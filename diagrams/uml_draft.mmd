@@ -1,0 +1,36 @@
+classDiagram
+    direction TB
+
+    class Owner {
+        - name
+        - pets
+        + add_pet()
+    }
+
+    class Pet {
+        - name
+        - tasks
+        + add_task()
+    }
+
+    class Task {
+        - description
+        - time
+        - frequency
+        - duration
+        - priority
+        - completionStatus
+    }
+
+    class Scheduler {
+        - owner : Owner
+        + sort_by_time()
+        + filter_tasks()
+        + detect_conflicts()
+        + handle_recurrence()
+    }
+
+    Owner --> Pet : owns
+    Pet --> Task : has
+    Owner --> Scheduler : uses
+    Scheduler --> Task : needs
