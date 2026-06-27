@@ -1,52 +1,6 @@
-from dataclasses import dataclass, field
-from typing import List, Optional
+from pawpal_system import Owner, Pet, Scheduler, Task
 
 import streamlit as st
-
-
-@dataclass
-class Task:
-    description: str
-    time: Optional[str] = None
-    frequency: Optional[str] = None
-    duration: Optional[int] = None
-    priority: Optional[str] = None
-    completion_status: bool = False
-
-
-@dataclass
-class Pet:
-    name: str
-    tasks: List[Task] = field(default_factory=list)
-
-    def add_task(self, task: Task) -> None:
-        self.tasks.append(task)
-
-
-@dataclass
-class Owner:
-    name: str
-    pets: List[Pet] = field(default_factory=list)
-
-    def add_pet(self, pet: Pet) -> None:
-        self.pets.append(pet)
-
-
-class Scheduler:
-    def __init__(self, owner: Owner):
-        self.owner = owner
-
-    def sort_by_time(self) -> List[Task]:
-        pass
-
-    def filter_tasks(self) -> List[Task]:
-        pass
-
-    def detect_conflicts(self) -> List[Task]:
-        pass
-
-    def handle_recurrence(self) -> List[Task]:
-        pass
 
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
