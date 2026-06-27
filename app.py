@@ -70,18 +70,21 @@ st.markdown("### Tasks")
 st.caption("Add a few tasks for the selected pet.")
 
 if selected_pet is not None:
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         task_title = st.text_input("Task title", value="Morning walk")
     with col2:
-        duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+        task_time = st.text_input("Time", value="08:00")
     with col3:
+        duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    with col4:
         priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
     if st.button("Add task"):
         if task_title.strip():
             task = Task(
                 description=task_title.strip(),
+                time=task_time.strip() or None,
                 duration=int(duration),
                 priority=priority,
             )
@@ -114,10 +117,16 @@ st.caption("Generate a simple ordered schedule from your current owner data.")
 if st.button("Generate schedule"):
     scheduler = Scheduler(owner)
     scheduled_tasks = scheduler.sort_by_time()
+    conflicts = scheduler.detect_conflicts()
 
     if scheduled_tasks:
-        st.write("Today's Schedule")
+        st.subheader("Today's Schedule")
         for task in scheduled_tasks:
-            st.write(f"- {task.time or '-'} | {task.description} | Priority: {task.priority} | Duration: {task.duration} min")
+            st.write(f"- {task.time or '-'} | {task.description} | Priority: {task.priority} | Duration: {task.duration} min | Completed: {task.completion_status}")
     else:
         st.info("No tasks available to schedule yet.")
+
+    if conflicts:
+        st.warning("Conflicts detected:")
+        for first, second in conflicts:
+            st.write(f"- {first.description} and {second.description} share the same time")

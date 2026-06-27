@@ -44,14 +44,14 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
-
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule
+====================
+- 07:30 | Feed breakfast | Priority: medium | Duration: 15 min
+- 08:00 | Morning walk | Priority: high | Duration: 30 min
+- 19:00 | Evening playtime | Priority: high | Duration: 45 min
+Conflicts:
+- None
 ```
 
 ## 🧪 Testing PawPal+
@@ -67,7 +67,15 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.5.0
+rootdir: /Users/pranavkishore/ai110-module2show-pawpal-starter
+plugins: anyio-4.13.0
+collected 17 items
+
+tests/test_pawpal.py .................                                   [100%]
+
+============================== 17 passed in 0.01s ==============================
 ```
 
 ## 📐 Smarter Scheduling
@@ -76,19 +84,21 @@ Sample test output:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | sort_by_time() | Sorts by time, then priority, then description |
+| Filtering | filter_tasks() | Filters by completion status or pet name |
+| Conflict handling | detect_conflicts() | Flags overlapping tasks using duration |
+| Recurring tasks | handle_recurrence() | Creates next occurrence when task is marked complete |
 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Enter owner name and add a pet with a name and species
+2. Select the pet and add tasks with title, duration, priority, and time
+3. Click Generate Schedule to see tasks sorted chronologically
+4. Conflict warnings appear if two tasks overlap
+5. Mark a recurring task complete to generate the next occurrence
+
+
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

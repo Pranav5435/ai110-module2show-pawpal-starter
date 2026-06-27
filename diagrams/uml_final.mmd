@@ -1,0 +1,47 @@
+classDiagram
+    direction TB
+
+    class Owner {
+        - name: str
+        - pets: List~Pet~
+        + add_pet(pet: Pet) None
+        + get_all_tasks() List~Task~
+    }
+
+    class Pet {
+        - name: str
+        - tasks: List~Task~
+        + add_task(task: Task) None
+        + get_pending_tasks() List~Task~
+    }
+
+    class Task {
+        - description: str
+        - time: Optional~str~
+        - frequency: Optional~str~
+        - duration: Optional~int~
+        - priority: Optional~str~
+        - completion_status: bool
+        + create_next_occurrence() Task
+        + mark_complete(pet: Optional~Pet~) None
+        + mark_incomplete() None
+        + is_due() bool
+        + to_dict() dict
+    }
+
+    class Scheduler {
+        - owner: Owner
+        - _all_tasks() List~Task~
+        - _parse_minutes(value: Optional~str~) int
+        - _priority_rank(task: Task) int
+        - _overlaps(first: Task, second: Task) bool
+        + sort_by_time() List~Task~
+        + filter_tasks(tasks: Optional~List~Task~~ = None, completion_status: Optional~bool~ = None) List~Task~
+        + detect_conflicts() List~Tuple~Task, Task~~
+        + handle_recurrence() List~Task~
+    }
+
+    Owner --> Pet : owns
+    Pet --> Task : contains
+    Scheduler --> Owner : manages
+    Scheduler --> Task : evaluates

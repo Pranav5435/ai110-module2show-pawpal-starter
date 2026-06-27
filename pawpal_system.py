@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 
@@ -14,7 +14,7 @@ def _parse_time(value: Optional[str]) -> Optional[datetime]:
         try:
             return datetime.strptime(value, fmt)
         except ValueError:
-            continue
+            pass
     return None
 
 
@@ -27,9 +27,39 @@ class Task:
     priority: Optional[str] = None
     completion_status: bool = False
 
-    def mark_complete(self) -> None:
-        """Mark the task as complete."""
+    def create_next_occurrence(self) -> "Task":
+        """Create the next occurrence for a daily or weekly task."""
+        if not self.frequency or self.frequency.lower() not in {"daily", "weekly"}:
+            return Task(
+                description=self.description,
+                time=self.time,
+                frequency=None,
+                duration=self.duration,
+                priority=self.priority,
+                completion_status=False,
+            )
+
+        parsed_time = _parse_time(self.time)
+        if parsed_time is None:
+            next_time = self.time
+        else:
+            delta = timedelta(days=1) if self.frequency.lower() == "daily" else timedelta(weeks=1)
+            next_time = (parsed_time + delta).strftime("%H:%M")
+
+        return Task(
+            description=self.description,
+            time=next_time,
+            frequency=self.frequency,
+            duration=self.duration,
+            priority=self.priority,
+            completion_status=False,
+        )
+
+    def mark_complete(self, pet: Optional["Pet"] = None) -> None:
+        """Mark the task as complete and schedule the next recurrence when applicable."""
         self.completion_status = True
+        if pet is not None and self.frequency and self.frequency.lower() in {"daily", "weekly"}:
+            pet.add_task(self.create_next_occurrence())
 
     def mark_incomplete(self) -> None:
         """Mark the task as incomplete."""
@@ -103,9 +133,12 @@ class Scheduler:
         return {"high": 0, "medium": 1, "low": 2}.get((task.priority or "").lower(), 99)
 
     def _overlaps(self, first: Task, second: Task) -> bool:
-        """Return whether two tasks overlap in time."""
-        if not first.time or not second.time or first.duration is None or second.duration is None:
+        """Return whether two tasks overlap in time, including exact time matches as a fallback."""
+        if not first.time or not second.time:
             return False
+
+        if first.duration is None or second.duration is None:
+            return self._parse_minutes(first.time) == self._parse_minutes(second.time)
 
         first_start = self._parse_minutes(first.time)
         second_start = self._parse_minutes(second.time)
@@ -125,9 +158,16 @@ class Scheduler:
             ),
         )
 
-    def filter_tasks(self) -> List[Task]:
-        """Return only tasks that are still pending."""
-        return [task for task in self._all_tasks() if not task.completion_status]
+    def filter_tasks(
+        self,
+        tasks: Optional[List[Task]] = None,
+        completion_status: Optional[bool] = None,
+    ) -> List[Task]:
+        """Return tasks filtered by completion status when provided."""
+        source_tasks = tasks if tasks is not None else self._all_tasks()
+        if completion_status is None:
+            return list(source_tasks)
+        return [task for task in source_tasks if task.completion_status is completion_status]
 
     def detect_conflicts(self) -> List[Tuple[Task, Task]]:
         """Find overlapping pending tasks."""
@@ -150,15 +190,9 @@ class Scheduler:
                 continue
 
             for occurrence in range(1, 4):
-                expanded_tasks.append(
-                    Task(
-                        description=f"{task.description} (occurrence {occurrence})",
-                        time=task.time,
-                        frequency=None,
-                        duration=task.duration,
-                        priority=task.priority,
-                        completion_status=False,
-                    )
-                )
+                next_task = task.create_next_occurrence()
+                next_task.description = f"{task.description} (occurrence {occurrence})"
+                next_task.frequency = None
+                expanded_tasks.append(next_task)
 
         return expanded_tasks
